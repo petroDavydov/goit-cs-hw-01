@@ -127,11 +127,35 @@ class Parser:
         else:
             self.error()
 
-    def term(self):
-        """Парсер для 'term' правил граматики. У нашому випадку - це цілі числа."""
+    def factor(self):
+        """Парсер для 'factor' правил граматики. У нашому випадку - це цілі числа."""
         token = self.current_token
-        self.eat(TokenType.INTEGER)
-        return Num(token)
+        if token.type == TokenType.INTEGER:
+            self.eat(TokenType.INTEGER)
+            return Num(token)
+        elif token.type == TokenType.LPAREN:
+            self.eat(TokenType.LPAREN)
+            result = self.expr()        
+            self.eat(TokenType.RPAREN)
+            return result
+
+    
+    
+    def term(self):
+        """Парсер для 'term' включно множення та ділення"""
+        node = self.factor()
+
+        while self.current_token.type in (TokenType.DIV, TokenType.MUL):
+            token = self.current_token
+            if token.type == TokenType.DIV:
+                self.eat(TokenType.DIV)
+            elif token.type == TokenType.MUL:
+                self.eat(TokenType.MUL)
+
+            node = BinOp(left=node, op=token, right=self.factor())
+
+        return node
+
 
     def expr(self):
         """Парсер для арифметичних виразів."""
@@ -168,11 +192,16 @@ class Interpreter:
     def __init__(self, parser):
         self.parser = parser
 
+    # якщо буде // то буде ціле число
     def visit_BinOp(self, node):
         if node.op.type == TokenType.PLUS:
             return self.visit(node.left) + self.visit(node.right)
-        elif node.op.type == TokenType.MINUS:
+        if  node.op.type == TokenType.MINUS:
             return self.visit(node.left) - self.visit(node.right)
+        if  node.op.type == TokenType.MUL:
+            return self.visit(node.left) * self.visit(node.right)
+        if  node.op.type == TokenType.DIV:
+            return self.visit(node.left) / self.visit(node.right)
 
     def visit_Num(self, node):
         return node.value
