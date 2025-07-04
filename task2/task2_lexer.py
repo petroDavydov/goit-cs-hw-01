@@ -8,12 +8,12 @@ class ParsingError(Exception):
 
 class TokenType:
     INTEGER = "INTEGER"
-    PLUS = "PLUS"
-    MINUS = "MINUS"
-    MUL = "Multiple"
-    DIV = "DIVIDE"
-    LPAREN = "LPAREN"
-    RPAREN = "RPAREN"
+    PLUS = "PLUS" # Додавання
+    MINUS = "MINUS" # Віднімання
+    MUL = "MULTIPLE"  # Множення
+    DIV = "DIVIDE"  # Ділення
+    LPAREN = "LPAREN" # Ліва дужка
+    RPAREN = "RPAREN" # Права дужка
     EOF = "EOF"  # Означає кінець вхідного рядка
 
 
@@ -70,6 +70,22 @@ class Lexer:
             if self.current_char == "-":
                 self.advance()
                 return Token(TokenType.MINUS, "-")
+            
+            if self.current_char == "*":
+                self.advance()
+                return Token(TokenType.MUL, "*")
+            
+            if self.current_char == "/":
+                self.advance()
+                return Token(TokenType.DIV, "/")
+            
+            if self.current_char == "(":
+                self.advance()
+                return Token(TokenType.LPAREN, "(")
+            
+            if self.current_char == ")":
+                self.advance()
+                return Token(TokenType.RPAREN, ")")
 
             raise LexicalError("Помилка лексичного аналізу")
 
